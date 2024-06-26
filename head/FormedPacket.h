@@ -13,8 +13,8 @@
 
 
 //ID=11 Дата и время встроенных часов
-//		1. запрос Прочитать дату и время
-//		2. ответ  Прочитать дату и время
+//			1. запрос Прочитать дату и время
+//			2. ответ  Прочитать дату и время
 //		3. запрос Установить дату и время
 //		4. ответ  Установить дату и время
 
@@ -29,22 +29,22 @@
 class FormedPacket
 {
 private:
-		Packet internal_flag; //Flag; const 0x7E; 1 byte
-		Packet internal_lenght; //Len; В DEC 0..200; 1 byte
-		Packet internal_distination_address; //Dst; Адрес назначения (L..H); 6 byte
-		Packet internal_type_and_number; //Type; Тип пакета и текущий номер пакета; 1 byte
-		Packet internal_command_code; //CMD; Код команды; 1 byte
-		Packet internal_information; //Information; Данные; Len byte
-		Packet internal_FCS; //FCS; Котрольная сумма; 2 байта
+		Packet internal_flag;				 // Flag; const 0x7E; 1 byte
+		Packet internal_lenght;				 // Len; В DEC 0..200; 1 byte
+		Packet internal_distination_address; // Dst; Адрес назначения (L..H); 6 byte
+		Packet internal_type_and_number;	 // Type; Тип пакета и текущий номер пакета; 1 byte
+		Packet internal_command_code;		 // CMD; Код команды; 1 byte
+		Packet internal_information;		 // Information; Данные; Len byte
+		Packet internal_FCS;				 // FCS; Котрольная сумма; 2 байта
 
-		Packet external_flag; //Flag; const 0x7A; 1 byte
-		Packet external_address_lenght; // LenAdr; В DEC 0...7; 1 byte (Всего уровней ретронсляции и текущий уровень)
-	 Packet external_address; //Adr[LenAdr]...Adr[0]; Адрес(а) ретрансляции; 2 byte * (MAX 8)
+		Packet external_flag;			 //Flag; const 0x7A; 1 byte
+		Packet external_address_lenght;  // LenAdr; В DEC 0...7; 1 byte (Всего уровней ретронсляции и текущий уровень)
+	 Packet external_address;			 //Adr[LenAdr]...Adr[0]; Адрес(а) ретрансляции; 2 byte * (MAX 8)
 		Packet external_type_and_number; //Type; Тип пакета и текущий номер пакета; 1 byte
-		Packet external_lenght; //Len; Размер поля данных; 1 byte
-		Packet external_command_code; //CMD; Код команды; 1 byte
-		Packet external_information; //Inforamation; Внутренний пакет; Len byte
-	Packet external_FCS; //FCS; Котрольная суммаж 2 байта
+		Packet external_lenght;			 //Len; Размер поля данных; 1 byte
+		Packet external_command_code;	 //CMD; Код команды; 1 byte
+		Packet external_information;	 //Inforamation; Внутренний пакет; Len byte
+	Packet external_FCS;				 //FCS; Котрольная суммаж 2 байта
 
 	CS::list_ID_packet ID_packet;
 	//!!! НУЖЕН ENUM КОТОРЫЙ ХРАНИТ В СЕБЕ REQUEST И RESPONSE и от будет релизововать внутреннюю логику
