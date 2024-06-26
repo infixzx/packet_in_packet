@@ -8,7 +8,7 @@ class UnformedPacket
 {
 private:
 	Packet received_packet; // пакет до обработки
-	Packet unformed_packet;
+	Packet unformed_packet; // то что будем возвращать через функциюю reset
 
 	Packet external_flag; //Flag; const 0x7A; 1 byte
 	Packet external_address_lenght; // LenAdr; В DEC 0...7; 1 byte (Всего уровней ретронсляции и текущий уровень)

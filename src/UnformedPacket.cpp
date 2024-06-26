@@ -53,7 +53,9 @@ void UnformedPacket::setUnformedPacket(Packet unform_packet)
 void UnformedPacket::reset()
 {
 	received_packet = Packet();
-	//unformed_packet = Packet();
+	internal_lenght = Packet();
+	internal_information = Packet();
+	unformed_packet = Packet();
 }
 
 Packet UnformedPacket::returnUnformedPacket()
@@ -78,101 +80,79 @@ bool UnformedPacket::cheek_internal_status(Packet byte)
 
 void UnformedPacket::kostil_response_read_the_date_and_time()
 {
-	const uint8_t MAGIC_INDEX_internal_cmd = 15; // номер индекса кода команды внутреннего пакета
-	const uint8_t MAGIC_INDEX_internal_flag = 6;
+	//const uint8_t MAGIC_INDEX_internal_cmd = 15; // номер индекса кода команды внутреннего пакета
+	const uint8_t MAGIC_INDEX_internal_flag = 6; // если начанать с нуля, и отрезать внешний флаг
+	const uint8_t MAGIC_INDEX_internal_status = 9;
 
-	//uint32_t index = 4;
-	//index -= 5;
-	
-	//received_packet = Packet(); 
-	/*
-	received_packet.add_one_element_back(0x2F);
-	received_packet.add_one_element_back(0x12);
-	received_packet.add_one_element_back(0x73);
-	received_packet.add_one_element_back(0x73);
-	received_packet.add_one_element_back(0xA1);
-	received_packet.add_one_element_back(0x11);
-	received_packet.add_one_element_back(0x73);
-	received_packet.add_one_element_back(0x52);
-	received_packet.add_one_element_back(0x73);
-	received_packet.add_one_element_back(0x11);
-	received_packet.add_one_element_back(0xFF);
-	received_packet.add_one_element_back(0x22);
-	received_packet.add_one_element_back(0x73);
-	received_packet.add_one_element_back(0x22);
-	received_packet.add_one_element_back(0x31);
-	*/
-	//received_packet.print_packet_not_id();
-	
-	//std::cout << std::endl;
-	//std::cout << "rec[0, full]:"; received_packet.print_packet_not_id();
-	//received_packet.return_range(1, received_packet.lenght() - 1).print_packet_not_id();
-	//std::cout << "rec[1, full]:   ";  received_packet.return_range(1, received_packet.lenght() - 1).print_packet_not_id();
-	//uint8_t count_error = 0;
+
+	// байтстаффинг внешний
 	Packet external_bytestuffing_decod_packet = Encryption::bytestuffing_docode(received_packet.return_range(1, received_packet.lenght() - 1),
 			0x73, 0x11, 0x7A, 0x73, 0x22, 0x73);
-	
-	const uint8_t value_internal_len = external_bytestuffing_decod_packet[7];
-	//std::cout << std::endl;
-	//std::cout << "         ext:   "; external_bytestuffing_decod_packet.print_packet_not_id();
-	//std::cout << std::endl;
+
+	// проверка внешнего CRC
 	Packet external_cheek_fcs = Encryption::encryption_fcs16(crc, external_bytestuffing_decod_packet.return_range(0, 
 		external_bytestuffing_decod_packet.lenght() - 3)).reverse();
-	
-	//external_bytestuffing_decod_packet.print_packet_not_id();
-	//std::cout << std::endl;
 
-
+	// вывод ошибки внешнего СRC
 	if (!(((external_cheek_fcs[0] == external_bytestuffing_decod_packet[external_bytestuffing_decod_packet.lenght() - 2])
 		&& (external_cheek_fcs[1] == external_bytestuffing_decod_packet[external_bytestuffing_decod_packet.lenght() - 1]))))
 	{
 		std::cout << "Error: ошибка внутри контрольной суммы внешнего пакета!" << std::endl;
 	}
 	
-	Packet internal_bytestuffing_decod_packet = Encryption::bytestuffing_docode(external_bytestuffing_decod_packet.return_range(MAGIC_INDEX_internal_flag,
-		external_bytestuffing_decod_packet.lenght() - 1), 0x73, 0x11, 0x7A, 0x73, 0x22, 0x73);
-
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	//internal_bytestuffing_decod_packet.print_packet_not_id();
+	// байтстаффинг внутренний
+	Packet internal_bytestuffing_decod_packet = Encryption::bytestuffing_docode(external_bytestuffing_decod_packet.return_range(MAGIC_INDEX_internal_flag + 1,
+		external_bytestuffing_decod_packet.lenght() - 3), 0x7D, 0x5E, 0x7E, 0x7D, 0x5D, 0x7D);
 
-	internal_lenght.add_one_element_back(external_bytestuffing_decod_packet[7]);
-	//printf("Internal lenght = %d\n", internal_lenght[0]);
+	// проверка внутреннего CRC
+	Packet internal_cheek_fcs = Encryption::encryption_fcs16(crc, internal_bytestuffing_decod_packet.return_range(0,
+		internal_bytestuffing_decod_packet.lenght() - 3)).reverse();
 
-	//unformed_packet = internal_bytestuffing_decod_packet; //!!!! ТО ЧТО ПОЙДЁТ НА ВЫВОД
-
-	Packet status;
-	status.add_one_element_back(external_bytestuffing_decod_packet[MAGIC_INDEX_internal_cmd + 1]);
-	cheek_internal_status(status);
-
-	
-	internal_information = external_bytestuffing_decod_packet.return_range(MAGIC_INDEX_internal_cmd + 1, MAGIC_INDEX_internal_cmd + (uint8_t)internal_lenght[0]);
-	//internal_information.print_packet_not_id();
-	//unformed_packet = internal_information;
-	
-	//
-
-	//std::cout << "Internal status: ";
-	//internal_Status.print_packet_not_id();
-	//Packet internal_Date = 
-	//Packet internal_Control_byte = 
-
-	///////////////////////////////////////////////////////////////////////
-	/*
-	Packet internal_bytestuffing_decod_packet = Encryption::bytestuffing_docode(received_packet.return_range(1, received_packet.lenght() - 1),
-		0x73, 0x11, 0x7A, 0x73, 0x22, 0x73);
-	//std::cout << std::endl;
-	//std::cout << "         ext:   "; external_bytestuffing_decod_packet.print_packet_not_id();
-	//std::cout << std::endl;
-	Packet external_cheek_fcs = Encryption::encryption_fcs16(crc, external_bytestuffing_decod_packet.return_range(0,
-		external_bytestuffing_decod_packet.lenght() - 3)).reverse();
-
-	if (!(((external_cheek_fcs[0] == external_bytestuffing_decod_packet[external_bytestuffing_decod_packet.lenght() - 2])
-		&& (external_cheek_fcs[1] == external_bytestuffing_decod_packet[external_bytestuffing_decod_packet.lenght() - 1]))))
+	// вывод ошибки внутреннего СRC
+	if (!(((internal_cheek_fcs[0] == internal_bytestuffing_decod_packet[internal_bytestuffing_decod_packet.lenght() - 2])
+		&& (internal_cheek_fcs[1] == internal_bytestuffing_decod_packet[internal_bytestuffing_decod_packet.lenght() - 1]))))
 	{
 		std::cout << "Error: ошибка внутри контрольной суммы внутреннего пакета!" << std::endl;
 	}
-	*/
+
+
+
+	Packet status;
+	status.add_one_element_back(internal_bytestuffing_decod_packet[MAGIC_INDEX_internal_status]);
+	cheek_internal_status(status);
+
 	
+	internal_information = internal_bytestuffing_decod_packet.return_range(MAGIC_INDEX_internal_status,
+		internal_bytestuffing_decod_packet.lenght() - 3);
+	
+	
+
+	//проверка контролько байта
+	if (Encryption::encryption_сontrol_byte(internal_information.return_range(0, 9))[0]
+		!= internal_information[10])
+	{
+		std::cout << "Error: ошибка контрольного байта!" << std::endl;
+	}
+
+
+	Packet clocks;  clocks.add_one_element_back(internal_information[2]);  // часы, 0..23
+	Packet minutes; minutes.add_one_element_back(internal_information[3]); // минуты, 0..59
+	Packet seconds; seconds.add_one_element_back(internal_information[4]); // секунды, 0..59
+	Packet weekday; weekday.add_one_element_back(internal_information[5]); // день недели, 0..6
+	Packet numeral; numeral.add_one_element_back(internal_information[6]); // число, 1..31
+	Packet month;   month.add_one_element_back(internal_information[7]);   // месяц, 1..12
+	
+	Packet year_decade;  year_decade.add_one_element_back(internal_information[8]);  // год(десятилетие), 00..99
+	Packet year_century; year_century.add_one_element_back(internal_information[9]); // год(столетие)
+
+
+	printf("    Дата и время счётчика: %02d.%02d.%02d%02d %02d:%02d:%02d\n", 
+		numeral[0], month[0], year_century[0], year_decade[0],
+		clocks[0], minutes[0], seconds[0]);
+
+
 	reset();
 }
 

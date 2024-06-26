@@ -147,3 +147,18 @@ Packet Packet::return_range(uint16_t low, uint16_t high)
 	return temp;
 }
 
+Packet Packet::hex_to_dec_byte(Packet hex)
+{
+	Packet temp;
+	uchar hex_number = hex[0];
+	uchar dec_number = 0;
+	
+	uchar low_num = hex_number % 16;
+	uchar high_num = hex_number / 16;
+	dec_number = high_num * 16 + low_num;
+
+	temp.add_one_element_back(dec_number);
+
+	return temp;
+}
+

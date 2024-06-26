@@ -19,7 +19,7 @@ int main(void)
 	FormedPacket formed_packet(meter_number);
 	UnformedPacket unformed_packet(meter_number);
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 20; i++)
 	{
 		cout << "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << endl;
 		formed_packet.request_read_the_date_and_time();
@@ -32,12 +32,13 @@ int main(void)
 		Packet received_packet = COM.return_accept_packet();
 		
 		received_packet.print_packet_not_id();
-		
 		unformed_packet.setUnformedPacket(received_packet);
+		
 		unformed_packet.kostil_response_read_the_date_and_time();
+		
 		Packet decode_received_packet = unformed_packet.returnUnformedPacket();
 		decode_received_packet.print_packet_not_id();
-		//received_packet.print_packet_not_id();
+		
 		cout << "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << endl;
 		cout << endl;
 	}

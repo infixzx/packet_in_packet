@@ -32,5 +32,6 @@ public:
 	void add_one_element_back(uchar temp);
 	Packet reverse();
 	Packet return_range(uint16_t low, uint16_t high); // вернуть нам нужный диапозон packeta
+	Packet hex_to_dec_byte(Packet hex);
 };
 
