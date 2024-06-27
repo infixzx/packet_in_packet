@@ -78,6 +78,14 @@ bool UnformedPacket::cheek_internal_status(Packet byte)
 	}
 }
 
+void UnformedPacket::kostil_response_get_current_measurements_by_phase()
+{
+	// тут должны быть две магические константы
+
+}
+
+
+
 void UnformedPacket::kostil_response_read_the_date_and_time()
 {
 	//const uint8_t MAGIC_INDEX_internal_cmd = 15; // номер индекса кода команды внутреннего пакета

@@ -8,7 +8,7 @@
 //		2.ответ  Чтение состояния счётчика
 
 //ID=3 Текущие измерения пофазно
-//		1.запрос Получить текущие измерения пофазно
+//			1.запрос Получить текущие измерения пофазно
 //		2.ответ  Получить текущие измерения пофазно
 
 
@@ -86,7 +86,7 @@ public:
 	
 	//Запросы:
 	void request_reading_the_counter_status();		  //Чтение состояния счётчика
-	void request_get_current_measurements_by_phase(); //Получить текущие измерения пофазно
+		void request_get_current_measurements_by_phase(); //Получить текущие измерения пофазно
 		void request_read_the_date_and_time();		      //Прочитать дату и время
 	//void request_set_date_and_time();				  //Установить дату и время
 	void request_reading_slice_readings();		      //Чтение срезов показаний

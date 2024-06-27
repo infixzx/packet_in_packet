@@ -14,6 +14,41 @@ FormedPacket::FormedPacket(uint64_t met_num)
 
 }
 
+
+//запрос текущие измерения пофазно
+void FormedPacket::request_get_current_measurements_by_phase()
+{
+	internal_lenght.add_one_element_back(0x05);
+	internal_type_and_number = set_internal_type_and_number( // функцию нужно обязательно вызывать что увеличивать номер пакета
+		CS::INTERNAL_type_and_number::bit_7_not_encoded, CS::INTERNAL_type_and_number_pool::pool_false,
+		CS::INTERNAL_type_and_number_pool::pool_false, CS::INTERNAL_type_and_number_pool::pool_false);
+
+	//просто читаем
+	internal_command_code = set_internal_command_code(CS::INTERNAL_command_code::bit_7_not_encoded, CS::INTERNAL_command_code_bit_6_0::Read_data);
+
+
+	internal_information.add_one_element_back(0x03); // ID
+	internal_information.add_one_element_back(0xFF); // все параметры по 1 фазе
+	internal_information.add_one_element_back(0xFF); // все параметры по 2 фазе
+	internal_information.add_one_element_back(0xFF); // все параметры по 3 фазе
+	Packet control_byte = Encryption::encryption_сontrol_byte(internal_information);
+
+	internal_information = internal_information + control_byte;
+	internal_FCS = Encryption::encryption_fcs16(crc, (internal_lenght + internal_distination_address + internal_type_and_number +
+		internal_command_code + internal_information));
+
+	internal_FCS.apply_reverse();
+
+	Packet internal_bytestuffing_encod = Encryption::bytestuffing_encod((internal_lenght + internal_distination_address +
+		internal_type_and_number + internal_command_code + internal_information + internal_FCS), 0x7E, 0x7D, 0x5E, 0x7D, 0x7D, 0x5D);
+
+
+	sent_packet = formed_external_kostil_packet(internal_flag + internal_bytestuffing_encod);
+
+	reset();
+}
+
+
 //запрос Прочитать дату и время
 void FormedPacket::request_read_the_date_and_time()
 {

@@ -22,7 +22,7 @@ int main(void)
 	for (int i = 0; i < 20; i++)
 	{
 		cout << "///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" << endl;
-		formed_packet.request_read_the_date_and_time();
+		formed_packet.request_get_current_measurements_by_phase();
 		Packet send_packet = formed_packet.returnSentPacket();
 		cout << "Отправленный пакет " << i << ": ";
 		send_packet.print_packet_not_id();
@@ -30,12 +30,14 @@ int main(void)
 		cout << "    Принятый пакет " << i << ": ";
 		COM.accept(2000);
 		Packet received_packet = COM.return_accept_packet();
-		
+
+
 		received_packet.print_packet_not_id();
 		unformed_packet.setUnformedPacket(received_packet);
 		
-		unformed_packet.kostil_response_read_the_date_and_time();
+		//unformed_packet.kostil_response_read_the_date_and_time();
 		
+
 		Packet decode_received_packet = unformed_packet.returnUnformedPacket();
 		decode_received_packet.print_packet_not_id();
 		
