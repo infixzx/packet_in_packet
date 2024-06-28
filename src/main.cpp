@@ -11,6 +11,7 @@ using namespace std;
 int main(void)
 {
 	setlocale(LC_ALL, "Russian");
+	//system("mode con cols=160 lines=40");
 
 	uint64_t meter_number = 235072;
 	ComPort COM("COM7");
@@ -35,7 +36,7 @@ int main(void)
 		received_packet.print_packet_not_id();
 		unformed_packet.setUnformedPacket(received_packet);
 		
-		//unformed_packet.kostil_response_read_the_date_and_time();
+		unformed_packet.kostil_response_get_current_measurements_by_phase();
 		
 
 		Packet decode_received_packet = unformed_packet.returnUnformedPacket();

@@ -29,6 +29,40 @@ Packet UnformedPacket::set_external_distination_address(uint64_t DEC_distination
 	return hex_disitination_address_2_byte;
 }
 
+vector<uchar> UnformedPacket::init_parameter_list(uchar list_phase_A)
+{
+	vector<uchar> key_ring; // копилка ключей
+	uchar PQUIFK[6] = { 'P', 'Q', 'U', 'I', 'F', 'K' };
+
+	for (int i = 0; i < 6; i++)
+	{
+		int low_bit;
+
+		if (list_phase_A % 2 == 0)
+			low_bit = 0;
+		else
+			low_bit = 1;
+
+		if (low_bit == 1)
+			key_ring.push_back(PQUIFK[i]);
+
+		list_phase_A = list_phase_A >> 1;
+	}
+
+	return key_ring;
+}
+
+/*
+CS::ID3_size_and_sign UnformedPacket::ID3_init_PQUIFK(uint8_t tmp_size, CS::ID3_sign tmp_sg)
+{
+	CS::ID3_size_and_sign temp;
+	temp.size = tmp_size;
+	temp.sign = tmp_sg;
+
+	return temp;
+}
+*/
+
 UnformedPacket::UnformedPacket(uint64_t met_num)
 {
 	//internal_flag.add_one_element_back(0x7E);
@@ -80,8 +114,235 @@ bool UnformedPacket::cheek_internal_status(Packet byte)
 
 void UnformedPacket::kostil_response_get_current_measurements_by_phase()
 {
-	// тут должны быть две магические константы
+	const uint8_t MAGIC_INDEX_internal_flag = 6; // если начанать с нуля, и отрезать внешний флаг
+	const uint8_t MAGIC_INDEX_internal_status = 9; // если начанать с нуля, и отрезать внутр. флаг
 
+	// байтстаффинг внешний
+	Packet external_bytestuffing_decod_packet = Encryption::bytestuffing_docode(received_packet.return_range(1, received_packet.lenght() - 1),
+		0x73, 0x11, 0x7A, 0x73, 0x22, 0x73);
+
+	// проверка внешнего CRC
+	Packet external_cheek_fcs = Encryption::encryption_fcs16(crc, external_bytestuffing_decod_packet.return_range(0,
+		external_bytestuffing_decod_packet.lenght() - 3)).reverse();
+
+	// вывод ошибки внешнего СRC
+	if (!(((external_cheek_fcs[0] == external_bytestuffing_decod_packet[external_bytestuffing_decod_packet.lenght() - 2])
+		&& (external_cheek_fcs[1] == external_bytestuffing_decod_packet[external_bytestuffing_decod_packet.lenght() - 1]))))
+	{
+		std::cout << "Error: ошибка внутри контрольной суммы внешнего пакета!" << std::endl;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// байтстаффинг внутренний
+	Packet internal_bytestuffing_decod_packet = Encryption::bytestuffing_docode(external_bytestuffing_decod_packet.return_range(MAGIC_INDEX_internal_flag + 1,
+		external_bytestuffing_decod_packet.lenght() - 3), 0x7D, 0x5E, 0x7E, 0x7D, 0x5D, 0x7D);
+
+	// проверка внутреннего CRC
+	Packet internal_cheek_fcs = Encryption::encryption_fcs16(crc, internal_bytestuffing_decod_packet.return_range(0,
+		internal_bytestuffing_decod_packet.lenght() - 3)).reverse();
+
+	// вывод ошибки внутреннего СRC
+	if (!(((internal_cheek_fcs[0] == internal_bytestuffing_decod_packet[internal_bytestuffing_decod_packet.lenght() - 2])
+		&& (internal_cheek_fcs[1] == internal_bytestuffing_decod_packet[internal_bytestuffing_decod_packet.lenght() - 1]))))
+	{
+		std::cout << "Error: ошибка внутри контрольной суммы внутреннего пакета!" << std::endl;
+	}
+
+	Packet status;
+	status.add_one_element_back(internal_bytestuffing_decod_packet[MAGIC_INDEX_internal_status]);
+	cheek_internal_status(status);
+
+	internal_information = internal_bytestuffing_decod_packet.return_range(MAGIC_INDEX_internal_status,
+		internal_bytestuffing_decod_packet.lenght() - 3);
+
+	//internal_information.print_packet();
+
+	//проверка контролько байта
+	if (Encryption::encryption_сontrol_byte(internal_information.return_range(0, internal_information.lenght() - 2))[0]
+		!= internal_information[internal_information.lenght() - 1])
+	{
+		std::cout << "Error: ошибка контрольного байта!" << std::endl;
+	}
+
+	uchar uch_parameter_list_for_phase_A = internal_information[2];
+	//printf("phase_A = %02X\n", uc_parameter_list_for_phase_A);
+
+	vector<uchar> parameter_list = init_parameter_list(uch_parameter_list_for_phase_A);
+
+
+	//нужен и end и оно должно как то в цикле вертется
+	int8_t index_begin_internal_information = 5;
+
+	int32_t  P = 0; double db_P = 0.; bool bool_output_P = false;
+	int32_t  Q = 0; double db_Q = 0.; bool bool_output_Q = false;
+	uint32_t U = 0; double db_U = 0.; bool bool_output_U = false;
+	uint32_t I = 0; double db_I = 0.; bool bool_output_I = false;
+	uint16_t F = 0; double db_F = 0.; bool bool_output_F = false;
+	int16_t  K = 0; double db_K = 0.; bool bool_output_K = false;
+
+	//Packet catout_internal_information;
+
+	//catout_internal_information = internal_information.return_range(index_begin_internal_information, index_begin_internal_information + 4 - 1);
+	//catout_internal_information.print_packet();
+
+	
+	for (int8_t i = 0; i < parameter_list.size(); i++)
+	{
+		uchar symbol = parameter_list[i];
+		Packet catout_internal_information;
+		int j = 0;
+		int8_t number_of_bytes_in_the_type = 0;
+
+		switch (symbol)
+		{
+		case 'P':
+			number_of_bytes_in_the_type = 4;
+
+			catout_internal_information = internal_information.return_range(index_begin_internal_information, index_begin_internal_information + number_of_bytes_in_the_type - 1);
+			catout_internal_information = catout_internal_information.reverse();
+
+			index_begin_internal_information += number_of_bytes_in_the_type;
+
+			while (j < catout_internal_information.lenght() - 1)
+			{
+				P += catout_internal_information[j];
+				P = P << 8;
+				j++;
+			}
+			P += catout_internal_information[j];
+			j = 0;
+
+			bool_output_P = true;
+			db_P = P * 0.01;
+			//printf("Итоговое P = %f\n", db_P);
+			break;
+
+
+		case 'Q':
+			number_of_bytes_in_the_type = 4;
+
+			catout_internal_information = internal_information.return_range(index_begin_internal_information, index_begin_internal_information + number_of_bytes_in_the_type - 1);
+			catout_internal_information = catout_internal_information.reverse();
+
+			index_begin_internal_information += number_of_bytes_in_the_type;
+
+			while (j < catout_internal_information.lenght() - 1)
+			{
+				Q += catout_internal_information[j];
+				Q = Q << 8;
+				j++;
+			}
+			Q += catout_internal_information[j];
+			j = 0;
+
+			bool_output_Q = true;
+			db_Q = Q * 0.01;
+			//printf("Итоговое Q = %f\n", db_Q);
+			break;
+
+
+		case 'U':
+			number_of_bytes_in_the_type = 4;
+
+			catout_internal_information = internal_information.return_range(index_begin_internal_information, index_begin_internal_information + number_of_bytes_in_the_type - 1);
+			catout_internal_information = catout_internal_information.reverse();
+
+			index_begin_internal_information += number_of_bytes_in_the_type;
+
+			while (j < catout_internal_information.lenght() - 1)
+			{
+				U += catout_internal_information[j];
+				U = U << 8;
+				j++;
+			}
+			U += catout_internal_information[j];
+			j = 0;
+
+			bool_output_U = true;
+			db_U = U * 0.01;
+			//printf("Итоговое U = %f\n", db_U);
+			break;
+		
+		case 'I':
+			number_of_bytes_in_the_type = 4;
+
+			catout_internal_information = internal_information.return_range(index_begin_internal_information, index_begin_internal_information + number_of_bytes_in_the_type - 1);
+			catout_internal_information = catout_internal_information.reverse();
+
+			index_begin_internal_information += number_of_bytes_in_the_type;
+
+			while (j < catout_internal_information.lenght() - 1)
+			{
+				I += catout_internal_information[j];
+				I = I << 8;
+				j++;
+			}
+			I += catout_internal_information[j];
+			j = 0;
+
+			bool_output_I = true;
+			db_I = I * 0.001;
+			//printf("Итоговое I = %f\n", db_I);
+			break;
+
+		case 'F':
+			number_of_bytes_in_the_type = 2;
+
+			catout_internal_information = internal_information.return_range(index_begin_internal_information, index_begin_internal_information + number_of_bytes_in_the_type - 1);
+			catout_internal_information = catout_internal_information.reverse();
+
+			index_begin_internal_information += number_of_bytes_in_the_type;
+
+			while (j < catout_internal_information.lenght() - 1)
+			{
+				F += catout_internal_information[j];
+				F = F << 8;
+				j++;
+			}
+			F += catout_internal_information[j];
+			j = 0;
+
+			bool_output_F = true;
+			db_F = F * 0.01;
+			//printf("Итоговое F = %f\n", db_F);
+			break;
+
+		case 'K':
+			number_of_bytes_in_the_type = 2;
+
+			catout_internal_information = internal_information.return_range(index_begin_internal_information, index_begin_internal_information + number_of_bytes_in_the_type - 1);
+			catout_internal_information = catout_internal_information.reverse();
+
+			index_begin_internal_information += number_of_bytes_in_the_type;
+
+			while (j < catout_internal_information.lenght() - 1)
+			{
+				K += catout_internal_information[j];
+				K = K << 8;
+				j++;
+			}
+			K += catout_internal_information[j];
+			j = 0;
+
+			bool_output_K = true;
+			db_K = K * 0.0001;
+			//printf("Итоговое I = %f\n", db_K);
+			break;
+		}
+	}
+
+	printf("\n---------------------\n");
+	printf("Параметр | Фаза A  \n");
+	printf("P (W)    | %-10.3f\n", db_P);
+	printf("Q (Var)  | %-10.3f\n", db_Q);
+	printf("U (V)    | %-10.2f\n", db_U);
+	printf("I (A)    | %-10.3f\n", db_I);
+	printf("F (Hz)   | %-10.2f\n", db_F);
+	printf("K        | %-10.2f\n", db_K);
+	printf("---------------------\n");
+
+	reset();
 }
 
 
@@ -138,11 +399,12 @@ void UnformedPacket::kostil_response_read_the_date_and_time()
 	
 
 	//проверка контролько байта
-	if (Encryption::encryption_сontrol_byte(internal_information.return_range(0, 9))[0]
-		!= internal_information[10])
+	if (Encryption::encryption_сontrol_byte(internal_information.return_range(0, internal_information.lenght() - 2))[0]
+		!= internal_information[internal_information.lenght() - 1])
 	{
 		std::cout << "Error: ошибка контрольного байта!" << std::endl;
 	}
+
 
 
 	Packet clocks;  clocks.add_one_element_back(internal_information[2]);  // часы, 0..23

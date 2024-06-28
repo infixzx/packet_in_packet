@@ -30,6 +30,11 @@ private:
 	Packet set_distination_address(uint64_t DEC_distination_address);
 	Packet set_external_distination_address(uint64_t DEC_distination_address);
 
+	//void check_bytestuffing_and_FCS(const uint8_t MAGIC_INDEX_internal_flag);
+	vector<uchar> init_parameter_list(uchar list_phase_A);
+
+	//CS::ID3_size_and_sign ID3_init_PQUIFK(uint8_t tmp_size, CS::ID3_sign tmp_sg);
+
 public:
 	UnformedPacket(uint64_t met_num);
 	void setUnformedPacket(Packet unform_packet);

@@ -116,6 +116,6 @@ Packet ComPort::return_accept_packet()
 	for (int i = 0; i < acceptedPacket.lenght(); i++)
 		temp.add_one_element_back(acceptedPacket[i]);
 	
-	cout << "Принятно " << temp.lenght() << " байт!" << endl;
+	//cout << "Принятно " << temp.lenght() << " байт!" << endl;
 	return temp;
 }

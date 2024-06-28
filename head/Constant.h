@@ -87,6 +87,30 @@ namespace CS
 		Power_factor	// коэфф. мощности, 5
 	};
 
+	/*
+	enum class ID3_sign : uint8_t
+	{
+		type_signed,  // знаковый -128..127 условно
+		type_unsigned // беззнаковый 0..255 условно
+	};
+
+	struct ID3_size_and_sign
+	{
+		uint8_t size;
+		ID3_sign sign;
+	};
+
+	const std::map<uchar, ID3_size_and_sign> ID3_key_value_phase_pars
+	{
+		{ 'P', ID3_init_PQUIFK(4, ID3_sign::type_signed) },   // int32
+		{ 'Q', ID3_init_PQUIFK(4, ID3_sign::type_signed) },	  // int32
+		{ 'U', ID3_init_PQUIFK(4, ID3_sign::type_unsigned) }, // uint32
+		{ 'I', ID3_init_PQUIFK(4, ID3_sign::type_unsigned) }, // uint32
+		{ 'F', ID3_init_PQUIFK(2, ID3_sign::type_unsigned) }, // uint16
+		{ 'K', ID3_init_PQUIFK(2, ID3_sign::type_signed) }    // int16
+	};
+	*/
+
 	// Тип энергии
 	enum class ID12_Type_of_energy : uint8_t
 	{
