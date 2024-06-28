@@ -25,6 +25,7 @@
     <ClInclude Include="head\FormedPacket.h" />
     <ClInclude Include="head\Packet.h" />
     <ClInclude Include="head\UnformedPacket.h" />
+    <ClInclude Include="Menu.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ComPort.cpp" />

@@ -52,17 +52,6 @@ vector<uchar> UnformedPacket::init_parameter_list(uchar list_phase_A)
 	return key_ring;
 }
 
-/*
-CS::ID3_size_and_sign UnformedPacket::ID3_init_PQUIFK(uint8_t tmp_size, CS::ID3_sign tmp_sg)
-{
-	CS::ID3_size_and_sign temp;
-	temp.size = tmp_size;
-	temp.sign = tmp_sg;
-
-	return temp;
-}
-*/
-
 UnformedPacket::UnformedPacket(uint64_t met_num)
 {
 	//internal_flag.add_one_element_back(0x7E);
@@ -334,17 +323,53 @@ void UnformedPacket::kostil_response_get_current_measurements_by_phase()
 
 	printf("\n---------------------\n");
 	printf("Параметр | Фаза A  \n");
-	printf("P (W)    | %-10.3f\n", db_P);
-	printf("Q (Var)  | %-10.3f\n", db_Q);
-	printf("U (V)    | %-10.2f\n", db_U);
-	printf("I (A)    | %-10.3f\n", db_I);
-	printf("F (Hz)   | %-10.2f\n", db_F);
-	printf("K        | %-10.2f\n", db_K);
+	
+	printf("P (W)    |");
+	if (bool_output_P)
+		printf(" %-10.3f\n", db_P);
+	else
+		printf(" Н/Д\n");
+
+
+	printf("Q (Var)  |");
+	if (bool_output_Q)
+		printf(" %-10.3f\n", db_Q);
+	else
+		printf(" Н/Д\n");
+
+
+	printf("U (V)    |");
+	if (bool_output_U)
+		printf(" %-10.2f\n", db_U);
+	else
+		printf(" Н/Д\n");
+
+
+	
+	printf("I (A)    |");
+	if(bool_output_I)
+		printf(" %-10.3f\n", db_I);
+	else
+		printf(" Н/Д\n");
+
+
+	printf("F (Hz)   |");
+	if(bool_output_F)
+		printf(" %-10.2f\n", db_F);
+	else
+		printf(" Н/Д\n");
+
+
+	printf("K        |");
+	if(bool_output_K)
+		printf(" %-10.2f\n", db_K);
+	else
+		printf(" Н/Д\n");
+
 	printf("---------------------\n");
 
 	reset();
 }
-
 
 
 void UnformedPacket::kostil_response_read_the_date_and_time()

@@ -4,6 +4,17 @@
 
 namespace CS
 {
+	enum class menu_options : uint8_t
+	{
+			quit,							   // выход
+		reading_the_counter_status,		   // Чтение состояния счётчика
+			get_current_measurements_by_phase, // Получить текущие измерения пофазно
+			read_the_date_and_time,		       // Прочитать дату и время
+		set_date_and_time,				   // Установить дату и время
+		reading_slice_readings,		       // Чтение срезов показаний
+		reading_the_load_chart		       // Чтения графика нагрузки
+	};
+
 	enum class list_ID_packet : uint8_t
 	{
 		ID9_Reading_the_counter_status,        // Чтение состояния счётчика, NEED
