@@ -23,15 +23,16 @@
     <ClInclude Include="head\Constant.h" />
     <ClInclude Include="head\Encryption.h" />
     <ClInclude Include="head\FormedPacket.h" />
+    <ClInclude Include="head\Menu.h" />
     <ClInclude Include="head\Packet.h" />
     <ClInclude Include="head\UnformedPacket.h" />
-    <ClInclude Include="Menu.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ComPort.cpp" />
     <ClCompile Include="src\Encryption.cpp" />
     <ClCompile Include="src\FormedPacket.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\Packet.cpp" />
     <ClCompile Include="src\UnformedPacket.cpp" />
   </ItemGroup>

@@ -1,6 +1,10 @@
 #pragma once
 #include <cstdint>
+#include <string>
 #include <map>
+
+typedef unsigned char uchar;
+using std::string;
 
 namespace CS
 {
@@ -12,7 +16,8 @@ namespace CS
 			read_the_date_and_time,		       // Прочитать дату и время
 		set_date_and_time,				   // Установить дату и время
 		reading_slice_readings,		       // Чтение срезов показаний
-		reading_the_load_chart		       // Чтения графика нагрузки
+		reading_the_load_chart,		       // Чтения графика нагрузки
+		unidentified					   // неопознанная клавиша
 	};
 
 	enum class list_ID_packet : uint8_t

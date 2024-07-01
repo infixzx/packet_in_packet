@@ -443,7 +443,7 @@ void UnformedPacket::kostil_response_read_the_date_and_time()
 	Packet year_century; year_century.add_one_element_back(internal_information[9]); // год(столетие)
 
 
-	printf("    Дата и время счётчика: %02d.%02d.%02d%02d %02d:%02d:%02d\n", 
+	printf("\nДата и время счётчика: %02d.%02d.%02d%02d %02d:%02d:%02d\n", 
 		numeral[0], month[0], year_century[0], year_decade[0],
 		clocks[0], minutes[0], seconds[0]);
 

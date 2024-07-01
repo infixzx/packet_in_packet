@@ -93,6 +93,7 @@ public:
 	//void request_reading_the_load_chart();	      //Чтения графика нагрузки
 	
 	void reset();
+	void reset_sent_packet();
 
 	Packet returnSentPacket(); // отправленный пакет
 };

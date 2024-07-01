@@ -233,8 +233,13 @@ void FormedPacket::reset()
 	external_information = Packet();
 	external_address_lenght = Packet();
 
-	Packet sent_packet = Packet();
-	Packet received_packet = Packet();
+	//sent_packet = Packet();
+	//Packet received_packet = Packet();
+}
+
+void FormedPacket::reset_sent_packet()
+{
+	sent_packet = Packet();
 }
 
 Packet FormedPacket::returnSentPacket()
