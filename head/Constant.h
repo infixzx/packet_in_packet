@@ -17,7 +17,8 @@ namespace CS
 		set_date_and_time,				   // Установить дату и время
 		reading_slice_readings,		       // Чтение срезов показаний
 		reading_the_load_chart,		       // Чтения графика нагрузки
-		unidentified					   // неопознанная клавиша
+		unidentified,					   // неопознанная клавиша
+		test
 	};
 
 	enum class list_ID_packet : uint8_t
@@ -146,6 +147,18 @@ namespace CS
 		Active_A_minus_sum,		 // Активная А-(суммарно), 13(D)
 		Reactive_R_plus_sum,     // Реактивная R+(суммарно), 14(E)
 		Reactive_R_minus_sum	 // Реактивная R-(суммарно), 15(F)
+	};
+
+	// Тип среза
+	enum class ID12_cut_type : uint8_t
+	{
+		current,			   // текущие, в программе "пакопительно", 0
+		start_t0_day_reading,  // срез показаний на начало дня, 1
+		month_to_date_reading, // срез показаний на начало месяца, 2
+		year_to_date_reading,  // срез показаний на начало года, 3
+		energy_gain__day,      // приращение энергии за день, 4
+		energy_gain__month,    // приращение энергии за месяц, 5
+		energy_increment_year  // приращение энергии за год, 6
 	};
 
 	//Тип энергии

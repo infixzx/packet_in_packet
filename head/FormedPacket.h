@@ -19,7 +19,7 @@
 //		4. ответ  Установить дату и время
 
 //ID=12 Срезы показаний на начало дня/месяца/года, за день/месяц/год
-//		1. запрос Чтение срезов показаний
+//			1. запрос Чтение срезов показаний
 //		2. ответ  Чтение срезов показаний
 
 //ID=10 График нагрузки
@@ -79,6 +79,7 @@ private:
 
 	Packet formed_external_kostil_packet(Packet Information);
 
+
 	//Encryption??? 
 public:
 	FormedPacket(uint64_t met_num);
@@ -89,9 +90,10 @@ public:
 		void request_get_current_measurements_by_phase(); //Получить текущие измерения пофазно
 		void request_read_the_date_and_time();		      //Прочитать дату и время
 	//void request_set_date_and_time();				  //Установить дату и время
-	void request_reading_slice_readings();		      //Чтение срезов показаний
+		void request_reading_slice_readings_base();		  //Чтение срезов показаний
 	//void request_reading_the_load_chart();	      //Чтения графика нагрузки
-	
+	void request_test(std::vector<uchar> temp);	// для отладки чисто через push_back();
+
 	void reset();
 	void reset_sent_packet();
 

@@ -19,9 +19,15 @@ private:
 	ComPort* COM;
 	FormedPacket*   formed_packet;
 	UnformedPacket* unformed_packet;
-
+	std::vector<std::vector<uchar>> test_array; // TEST
+	int32_t counter_test_packet; // TEST
 
 	void cmd_configuration(int width, int height, int bufferHeight); // настройа размеров окна
+
+	uchar hex_char_to_value(char c); // TEST
+	std::vector<std::vector<uchar>> init_array_test_packet(std::string name_file); // TEST
+	void output_array_test_packet(std::vector<std::vector<uchar>> output, std::string name_file); // TEST
+
 public:
 	Menu();
 	~Menu();

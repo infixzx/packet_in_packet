@@ -49,4 +49,5 @@ public:
 	//void response_set_date_and_time();			   //Установить дату и время
 	void response_reading_slice_readings();		       //Чтение срезов показаний
 	//void response_reading_the_load_chart();	       //Чтения графика нагрузки
+	void kostil_response_test();
 };

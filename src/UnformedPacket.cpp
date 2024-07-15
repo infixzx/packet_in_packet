@@ -371,7 +371,6 @@ void UnformedPacket::kostil_response_get_current_measurements_by_phase()
 	reset();
 }
 
-
 void UnformedPacket::kostil_response_read_the_date_and_time()
 {
 	//const uint8_t MAGIC_INDEX_internal_cmd = 15; // номер индекса кода команды внутреннего пакета
@@ -449,5 +448,9 @@ void UnformedPacket::kostil_response_read_the_date_and_time()
 
 
 	reset();
+}
+
+void UnformedPacket::kostil_response_test()
+{
 }
 

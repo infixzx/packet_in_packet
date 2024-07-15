@@ -1,5 +1,6 @@
 #include "../head/FormedPacket.h"
 
+
 FormedPacket::FormedPacket(uint64_t met_num)
 {
 	meter_number = met_num;
@@ -83,6 +84,76 @@ void FormedPacket::request_read_the_date_and_time()
 }
 
 
+//Чтение срезов показаний
+void FormedPacket::request_reading_slice_readings_base()
+{
+
+}
+
+
+void FormedPacket::request_test(std::vector<uchar> temp)
+{
+	/*
+	for (int i = 0; i < temp.size(); i++)
+	{
+		sent_packet.add_one_element_back(temp[i]);
+	}
+	*/
+
+	/*
+	Packet cheek_external;
+	cheek_external.add_one_element_back(0x00);
+	cheek_external.add_one_element_back(0x40);
+	cheek_external.add_one_element_back(0x96);
+	cheek_external.add_one_element_back(0x09);
+	cheek_external.add_one_element_back(0x0E);
+	cheek_external.add_one_element_back(0x08);
+	cheek_external.add_one_element_back(0x7E);
+	cheek_external.add_one_element_back(0xAA);
+	cheek_external.add_one_element_back(0xE2);
+
+	Packet bg;
+	bg.add_one_element_back(0x7A);
+
+
+	sent_packet = bg + cheek_external + cheek_internal;
+	*/
+
+	//Packet prr = Encryption::encryption_fcs16(crc, (cheek_external + cheek_internal));
+	//prr.apply_reverse();
+	//prr.print_packet_not_id();
+	
+	
+	/*
+	sent_packet.add_one_element_back(0x7A);
+	sent_packet.add_one_element_back(0x00);
+	sent_packet.add_one_element_back(0x40);
+	sent_packet.add_one_element_back(0x96);
+	sent_packet.add_one_element_back(0x0A);
+	sent_packet.add_one_element_back(0x0E);
+	sent_packet.add_one_element_back(0x08);
+	sent_packet.add_one_element_back(0x7E);
+	sent_packet.add_one_element_back(0x02);
+	sent_packet.add_one_element_back(0x40);
+	sent_packet.add_one_element_back(0x96);
+	sent_packet.add_one_element_back(0x03);
+	sent_packet.add_one_element_back(0x00);
+	sent_packet.add_one_element_back(0x00);
+	sent_packet.add_one_element_back(0x00);
+	sent_packet.add_one_element_back(0x0A);
+	sent_packet.add_one_element_back(0x03);
+	sent_packet.add_one_element_back(0x09);
+	sent_packet.add_one_element_back(0x09);
+	sent_packet.add_one_element_back(0x99);
+	sent_packet.add_one_element_back(0x12);
+	sent_packet.add_one_element_back(0xBC); // ДОЛЖНО БЫТЬ BC, А У МЕНЯ 9D
+	sent_packet.add_one_element_back(0xCC); // ДОЛЖНО БЫТЬ СС, А У МЕНЯ 32
+	*/
+
+	reset();
+}
+
+
 Packet FormedPacket::set_distination_address(uint64_t DEC_distination_address)
 {
 	Packet result;
@@ -155,8 +226,7 @@ Packet FormedPacket::set_external_type_and_number(CS::EXTERNAL_type_and_number b
 	if (bit_4_pool == CS::EXTERNAL_type_and_number_pool::pool_true)
 		temp += 16;
 
-	//temp += сurrent_packet_number;
-	//incriment_сurrent_packet_number(); номер должен увеличиваться но почемуто у них в программе этого не происходит
+	temp += сurrent_packet_number - 1; //??? номер должен увеличиваться но почемуто у них в программе этого не происходит
 
 	tmp_packet.add_one_element_back(temp);
 
@@ -210,8 +280,10 @@ Packet FormedPacket::formed_external_kostil_packet(Packet Information)
 	external_information = Information;
 	external_command_code = set_external_command_code(CS::EXTERNAL_command_code::bit_7_not_encoded, CS::EXTERNAL_command_code_bit_6_0::data_transfer);
 	external_address_lenght.add_one_element_back(0x00);
+	
+
 	external_type_and_number = set_external_type_and_number(CS::EXTERNAL_type_and_number::bit_7_request, CS::EXTERNAL_type_and_number_pool::pool_false,
-		CS::EXTERNAL_type_and_number_pool::pool_false, CS::EXTERNAL_type_and_number_pool::pool_false);
+		CS::EXTERNAL_type_and_number_pool::pool_false, CS::EXTERNAL_type_and_number_pool::pool_false); //???
 
 	external_FCS = Encryption::encryption_fcs16(crc, (external_address_lenght + external_address + external_type_and_number +
 		external_lenght + external_command_code + external_information));
@@ -254,4 +326,3 @@ void FormedPacket::incriment_сurrent_packet_number()
 	else if (сurrent_packet_number == 15)
 		сurrent_packet_number = 0;
 }
-
