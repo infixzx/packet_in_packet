@@ -18,7 +18,7 @@ namespace CS
 		reading_slice_readings,		       // Чтение срезов показаний
 		reading_the_load_chart,		       // Чтения графика нагрузки
 		unidentified,					   // неопознанная клавиша
-		test
+			test
 	};
 
 	enum class list_ID_packet : uint8_t

@@ -1,4 +1,5 @@
 #include "../head/FormedPacket.h"
+#include <iostream>
 
 
 FormedPacket::FormedPacket(uint64_t met_num)
@@ -84,10 +85,272 @@ void FormedPacket::request_read_the_date_and_time()
 }
 
 
+
+void FormedPacket::print_binary_ID12(uint16_t value)
+{
+	char buffer[17];
+	buffer[16] = '\0';
+
+	for (uint8_t i = 0; i < 16; i++)
+	{
+		if (value & 1)
+			buffer[15 - i] = '1';
+		else
+			buffer[15 - i] = '0';
+
+		value = value >> 1;
+	}
+
+	for (int i = 0; i < 16; i++)
+	{
+		if ((i % 4 == 0) && (i != 0))
+			std::cout << " ";
+		printf("%c", buffer[i]);
+	}
+	std::cout << std::endl;
+}
+
+
+
+void FormedPacket::print_date_ID12(uchar high_byte, uchar low_byte)
+{
+	const uint8_t month_lenght_bit = 4;
+	const uint8_t date_lenght_bit = 5;
+	const uint8_t year_lenght_bit = 7;
+
+	uint16_t result = 0;
+
+	result += high_byte;
+	result = result << 8;
+	result += low_byte;
+
+	uint16_t high_bit_result = result % 2;
+	high_bit_result = high_bit_result << 15;
+	result = result >> 1;
+	result += high_bit_result;
+
+	uint16_t month = result >> (16 - month_lenght_bit);
+
+	uint16_t date = result << month_lenght_bit;
+	date = date >> (month_lenght_bit + year_lenght_bit);
+
+	uint16_t year = result << (month_lenght_bit + date_lenght_bit);
+	year = year >> (month_lenght_bit + date_lenght_bit);
+
+	//printf("%02u.%02u.20%02u\n", date, month, year);
+}
+
+
+// число:месяц:год, вернёт массив из двух байт(high, low)
+uchar* FormedPacket::input_print_date_ID12(uint16_t date, uint16_t month, uint16_t year)
+{
+	const uint8_t date_lenght_bit = 5;
+	const uint8_t year_lenght_bit = 7;
+
+	uchar *result = new uchar[2];
+	uint16_t temp_res = 0;
+
+	temp_res += year << 1;
+	temp_res += date << (year_lenght_bit + 1);
+	temp_res += month << (date_lenght_bit + year_lenght_bit + 1);
+	temp_res += (month >> 3) % 2;
+
+	result[0] = temp_res >> 8; // high 
+	result[1] = ((temp_res << 8) >> 8); // low
+
+	//printf("%2X %2X\n", result[0], result[1]);
+
+	return result;
+}
+
+
 //Чтение срезов показаний
 void FormedPacket::request_reading_slice_readings_base()
 {
+		// Cпрашиваемая дату (число, месяц, год)
+		// Cпрашиваем тип запрашиваемой энергии 0..15
+		// Cпрашиваем номер тарифа на самом деле от 0..3(но в программе 1..4). Если указать 0xFF то выводятся суммарные данные по всем тарифам. Тип среза при этот игнорируется.
+	// Cпрашиваем тип среза 0..6
 
+	internal_lenght.add_one_element_back(0x07);
+	internal_type_and_number = set_internal_type_and_number( // функцию нужно обязательно вызывать что увеличивать номер пакета
+		CS::INTERNAL_type_and_number::bit_7_not_encoded, CS::INTERNAL_type_and_number_pool::pool_false,
+		CS::INTERNAL_type_and_number_pool::pool_false, CS::INTERNAL_type_and_number_pool::pool_false);
+
+	//просто читаем
+	internal_command_code = set_internal_command_code(CS::INTERNAL_command_code::bit_7_not_encoded, CS::INTERNAL_command_code_bit_6_0::Read_data);
+
+	internal_information.add_one_element_back(0x0C); // ID
+
+
+	// дата в формата u16
+	do 
+	{
+		uint16_t day = 0, month = 0, year = 0;
+
+		printf("	Введите дату в формате (число месяц год): ");
+		
+		int8_t count_arg = scanf_s("%hu %hu %hu", &day, &month, &year);
+		
+		while (getchar() != '\n');
+
+		if (count_arg == 3)
+		{
+			if ((day >= 1 && day <= 31) && (month >= 1 && month <= 12) && (year >= 2000 && year <= 2100))
+			{
+				printf("%02hu.%02hu.%04hu\n", day, month, year);
+				year -= 2000;
+				uchar* temp_date = input_print_date_ID12(day, month, year);
+				internal_information.add_one_element_back(temp_date[0]);
+				internal_information.add_one_element_back(temp_date[1]);
+				delete[] temp_date;
+				break;
+			}
+		}
+
+		printf("Попробуйте ещё раз!\n");
+	} while (true);
+
+
+
+	// тип запрашиваемой энергии
+	do
+	{	
+		uint16_t key = 16;
+
+		printf("\n0  - Активная А+(фаза А)    \n");
+		printf("1  - Активная А-(фаза А)    \n");
+		printf("2  - Реактивная R+(фаза А)  \n");
+		printf("3  - Реактивная R-(фаза А)  \n");
+		printf("4  - Активная А+(фаза B)    \n");
+		printf("5  - Активная А-(фаза B)    \n");
+		printf("6  - Реактивная R+(фаза B)  \n");
+		printf("7  - Реактивная R-(фаза B)  \n");
+		printf("8  - Активная А+(фаза C)    \n");
+		printf("9  - Активная А-(фаза C)    \n");
+		printf("10 - Реактивная R+(фаза C)  \n");
+		printf("11 - Реактивная R-(фаза C)  \n");
+		printf("12 - Активная А+(суммарно)  \n");
+		printf("13 - Активная А-(суммарно)  \n");
+		printf("14 - Реактивная R+(суммарно)\n");
+		printf("15 - Реактивная R-(суммарно)\n");
+		printf("	Выберите тип запрашиваемой энергии: ");
+
+		int8_t count_arg = scanf_s("%hu", &key);
+
+		while (getchar() != '\n');
+
+		if (count_arg == 1)
+		{
+			if(key >= 0 && key <= 15)
+			{
+				printf("%02hu\n", key);
+				internal_information.add_one_element_back((uchar)key);
+				break;
+			}
+		}
+
+		printf("Попробуйте ещё раз!\n");
+
+	} while (true);
+
+
+	bool switch_cut_type = true;
+
+	// номер тарифа
+	do
+	{
+		uint16_t tariff_number = 255;
+		printf("\nВведите номер тарифа (1..4), \n");
+		printf("если выбрать 0 то, выводятся суммарные данные по всем тарифам,\n");
+		printf("	тип среза при этом игнорируется: ");
+
+		int8_t count_arg = scanf_s("%hu", &tariff_number);
+
+		while (getchar() != '\n');
+
+		if (count_arg == 1)
+		{
+			if (tariff_number >= 1 && tariff_number <= 4)
+			{
+				printf("%02hu\n", tariff_number);
+				tariff_number--;
+				internal_information.add_one_element_back((uchar)tariff_number);
+				break;
+			}
+
+			if (tariff_number == 0)
+			{
+				switch_cut_type = false;
+				internal_information.add_one_element_back(0xFF);
+				internal_information.add_one_element_back(0x00);
+				break;
+			}
+		}
+
+		printf("Попробуйте ещё раз!\n");
+
+
+	} while (true);
+
+
+	// тип среза
+	while (switch_cut_type)
+	{
+		uint16_t cut_type = 16;
+
+
+		printf("\n0 - текущие (пакопительно)\n");
+		printf("1 - срез показаний на начало дня\n");
+		printf("2 - срез показаний на начало месяца\n");
+		printf("3 - срез показаний на начало года\n");
+		printf("4 - приращение энергии за день\n");
+		printf("5 - приращение энергии за месяц\n");
+		printf("6 - приращение энергии за год\n");
+		printf("	Выберите тип среза: ");
+
+		int8_t count_arg = scanf_s("%hu", &cut_type);
+
+		while (getchar() != '\n');
+
+		if (count_arg == 1)
+		{
+			if (cut_type >= 0 && cut_type <= 6)
+			{
+				printf("%02hu\n", cut_type);
+				internal_information.add_one_element_back((uchar)cut_type);
+				break;
+			}
+		}
+
+		printf("Попробуйте ещё раз!\n");
+	}
+
+	//internal_information.print_packet_not_id();
+
+	
+	Packet control_byte = Encryption::encryption_сontrol_byte(internal_information);
+	internal_information = internal_information + control_byte;
+
+
+	internal_FCS = Encryption::encryption_fcs16(crc, (internal_lenght + internal_distination_address + internal_type_and_number +
+		internal_command_code + internal_information));
+
+	internal_FCS.apply_reverse();
+
+	//Packet FullFormedPacket = 
+	Packet internal_bytestuffing_encod = Encryption::bytestuffing_encod((internal_lenght + internal_distination_address +
+		internal_type_and_number + internal_command_code + internal_information + internal_FCS), 0x7E, 0x7D, 0x5E, 0x7D, 0x7D, 0x5D);
+
+
+	sent_packet = formed_external_kostil_packet(internal_flag + internal_bytestuffing_encod);
+
+	//full.print_packet();
+
+	//FullFormedPacket.print_packet();
+	
+
+	reset();
 }
 
 

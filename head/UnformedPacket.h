@@ -47,7 +47,7 @@ public:
 		void kostil_response_get_current_measurements_by_phase(); //Получить текущие измерения пофазно
 		void kostil_response_read_the_date_and_time(); //Прочитать дату и время
 	//void response_set_date_and_time();			   //Установить дату и время
-	void response_reading_slice_readings();		       //Чтение срезов показаний
+		void kostil_response_reading_slice_readings();		   //Чтение срезов показаний
 	//void response_reading_the_load_chart();	       //Чтения графика нагрузки
 	void kostil_response_test();
 };

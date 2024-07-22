@@ -61,7 +61,7 @@ void Menu::init()
 			break;
 
 		case CS::menu_options::reading_slice_readings:  // Чтение срезов показаний
-			//заглушка
+			formed_packet->request_reading_slice_readings_base();
 			break;
 
 		case CS::menu_options::reading_the_load_chart: // Чтения графика нагрузки
@@ -115,8 +115,7 @@ void Menu::init()
 			break;
 
 		case CS::menu_options::reading_slice_readings:  // Чтение срезов показаний
-			printf("	Cкоро...\n");
-			//заглушка
+			unformed_packet->kostil_response_reading_slice_readings();
 			break;
 
 		case CS::menu_options::reading_the_load_chart: // Чтения графика нагрузки

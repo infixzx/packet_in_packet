@@ -450,7 +450,14 @@ void UnformedPacket::kostil_response_read_the_date_and_time()
 	reset();
 }
 
+//Чтение срезов показаний
+void UnformedPacket::kostil_response_reading_slice_readings()
+{
+
+}
+
 void UnformedPacket::kostil_response_test()
 {
+
 }
 

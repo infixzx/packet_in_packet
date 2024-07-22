@@ -80,6 +80,10 @@ private:
 	Packet formed_external_kostil_packet(Packet Information);
 
 
+	void print_binary_ID12(uint16_t value);
+	void print_date_ID12(uchar high_byte, uchar low_byte);
+	uchar* input_print_date_ID12(uint16_t date, uint16_t month, uint16_t year);
+
 	//Encryption??? 
 public:
 	FormedPacket(uint64_t met_num);
