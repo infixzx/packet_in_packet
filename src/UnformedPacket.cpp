@@ -453,11 +453,74 @@ void UnformedPacket::kostil_response_read_the_date_and_time()
 //Чтение срезов показаний
 void UnformedPacket::kostil_response_reading_slice_readings()
 {
+	const uint8_t MAGIC_INDEX_internal_flag = 6; // если начанать с нуля, и отрезать внешний флаг
+	const uint8_t MAGIC_INDEX_internal_status = 9; // если начанать с нуля, и отрезать внутр. флаг
+												   // байтстаффинг внешний
 
+
+
+	Packet external_bytestuffing_decod_packet = Encryption::bytestuffing_docode(received_packet.return_range(1, received_packet.lenght() - 1),
+		0x73, 0x11, 0x7A, 0x73, 0x22, 0x73);
+
+	// проверка внешнего CRC
+	Packet external_cheek_fcs = Encryption::encryption_fcs16(crc, external_bytestuffing_decod_packet.return_range(0,
+		external_bytestuffing_decod_packet.lenght() - 3)).reverse();
+
+	// вывод ошибки внешнего СRC
+	if (!(((external_cheek_fcs[0] == external_bytestuffing_decod_packet[external_bytestuffing_decod_packet.lenght() - 2])
+		&& (external_cheek_fcs[1] == external_bytestuffing_decod_packet[external_bytestuffing_decod_packet.lenght() - 1]))))
+	{
+		std::cout << "Error: ошибка внутри контрольной суммы внешнего пакета!" << std::endl;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// байтстаффинг внутренний
+	Packet internal_bytestuffing_decod_packet = Encryption::bytestuffing_docode(external_bytestuffing_decod_packet.return_range(MAGIC_INDEX_internal_flag + 1,
+		external_bytestuffing_decod_packet.lenght() - 3), 0x7D, 0x5E, 0x7E, 0x7D, 0x5D, 0x7D);
+
+	// проверка внутреннего CRC
+	Packet internal_cheek_fcs = Encryption::encryption_fcs16(crc, internal_bytestuffing_decod_packet.return_range(0,
+		internal_bytestuffing_decod_packet.lenght() - 3)).reverse();
+
+	// вывод ошибки внутреннего СRC
+	if (!(((internal_cheek_fcs[0] == internal_bytestuffing_decod_packet[internal_bytestuffing_decod_packet.lenght() - 2])
+		&& (internal_cheek_fcs[1] == internal_bytestuffing_decod_packet[internal_bytestuffing_decod_packet.lenght() - 1]))))
+	{
+		std::cout << "Error: ошибка внутри контрольной суммы внутреннего пакета!" << std::endl;
+	}
+
+	Packet status;
+	status.add_one_element_back(internal_bytestuffing_decod_packet[MAGIC_INDEX_internal_status]);
+	cheek_internal_status(status);
+
+	internal_information = internal_bytestuffing_decod_packet.return_range(MAGIC_INDEX_internal_status,
+		internal_bytestuffing_decod_packet.lenght() - 3);
+
+	//internal_information.print_packet();
+
+	//проверка контролько байта
+	if (Encryption::encryption_сontrol_byte(internal_information.return_range(0, internal_information.lenght() - 2))[0]
+		!= internal_information[internal_information.lenght() - 1])
+	{
+		std::cout << "Error: ошибка контрольного байта!" << std::endl;
+	}
+
+	uint32_t energy = 0;
+	
+	uint32_t b0 = internal_information[2];
+	uint32_t b1 = internal_information[3]; b1 = b1 << 8;
+	uint32_t b2 = internal_information[4]; b2 = b2 << 16;
+	uint32_t b3 = internal_information[5]; b3 = b3 << 24;
+
+	energy = b0 + b1 + b2 + b3;
+
+	double final_energy = energy / 1000.0;
+	printf("%.3f\n", final_energy);
 }
 
 void UnformedPacket::kostil_response_test()
 {
-
+	
 }
 
